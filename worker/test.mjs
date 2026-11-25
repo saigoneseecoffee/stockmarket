@@ -23,19 +23,13 @@ globalThis.fetch = async (url, init = {}) => {
       { start: "2025-03-30", end: "2025-06-28", val: 86e9, form: "10-Q", filed: "2025-08-01" },
       { end: "2026-06-27", val: 30e9, form: "10-Q", filed: "2026-08-01" } ] } }));
   }
-  if (url.includes("api.anthropic.com")) {
-    anthropicCalls++;
-    const body = JSON.parse(init.body);
-    if (anthropicCalls === 1) return new Response(JSON.stringify({ stop_reason: "pause_turn", content: [{ type: "server_tool_use", id: "s1", name: "web_search", input: { query: "AAPL news" } }, { type: "web_search_tool_result", tool_use_id: "s1", content: [{ type: "web_search_result", url: "https://www.reuters.com/x", title: "Reuters AAPL", page_age: "Nov 20, 2026" }, { type: "web_search_result", url: "javascript:alert(1)", title: "bad" }] }], usage: { server_tool_use: { web_search_requests: 1 } } }));
-    if (body.messages.length !== 2) throw new Error("pause_turn not continued");
-    return new Response(JSON.stringify({ stop_reason: "end_turn", content: [{ type: "text", text: "Tóm lại", citations: [{ type: "web_search_result_location", url: "https://www.reuters.com/x", title: "Reuters AAPL" }] }, { type: "text", text: "\n```json\n" + JSON.stringify({ company: { name: "Apple" }, scenarios: [{ name: "Tích cực", prob: 0.3, return_pct: 7 }, { name: "Cơ sở", prob: 0.5, return_pct: 1 }, { name: "Tiêu cực", prob: 0.2, return_pct: -8 }], scores: { business: 9, growth: 6, financial: 9, valuation: 5, b2b: 8, b2c: 9, management: 8, risk: 7 }, confidence: "trung bình" }) + "\n```" }], usage: { server_tool_use: { web_search_requests: 2 } } }));
-  }
+  if (url.includes("api.anthropic.com")) throw new Error("free version must not call Claude API");
   if (url.startsWith("https://script.google.com")) { const b = JSON.parse(init.body); sheetCalls.push(b);
     if (b.action === "list") return new Response(JSON.stringify({ rows: [{ id: "AAPL-abc123", ticker: "AAPL", targetDate: "2025-12-01", actual: "", median: 200, lo80: 180, hi80: 220 }] }));
     return new Response(JSON.stringify({ ok: true })); }
   throw new Error("unexpected fetch " + url);
 };
-const env = { ANTHROPIC_API_KEY: "k", APP_PIN: "2468", SHEET_URL: "https://script.google.com/macros/s/x/exec", SHEET_SECRET: "s", ALLOWED_ORIGIN: "https://saigoneseecoffee.github.io" };
+const env = { APP_PIN: "2468", SHEET_URL: "https://script.google.com/macros/s/x/exec", SHEET_SECRET: "s", ALLOWED_ORIGIN: "https://saigoneseecoffee.github.io" };
 const waits = []; const ctx = { waitUntil: p => waits.push(p) };
 const call = (path, body, origin = "https://saigoneseecoffee.github.io") => worker.fetch(new Request("https://w.dev" + path, { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(body) }), env, ctx);
 const assert = (c, m) => { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok:", m); };
@@ -49,12 +43,19 @@ assert(j.price === 199.5, "live price used for today");
 assert(j.sec.facts.revenue.annual[0].value === 416e9 && j.sec.facts.revenue.annual.length === 2, "SEC annual revenue (quarter in 10-K excluded)");
 assert(j.sec.facts.revenue.lastQ.value === 94e9 && j.sec.facts.revenue.lastQYearAgo.value === 86e9, "SEC last quarter + YoY");
 assert(j.sec.filings.length === 2 && j.sec.filings[0].url.startsWith("https://www.sec.gov/Archives/edgar/data/320193/"), "filings filtered + links");
-assert(j.sources.length === 1 && j.sources[0].cited, "sources: https only, cited flag");
-assert(j.searches === 3, "search count summed across pause_turn");
-assert(j.total === 76 && j.verdict.cls === "good", "score + verdict " + j.total);
+assert(j.report === null && j.total === null, "no AI report in data step");
+assert(Math.abs(j.forecast.median - j.price) < 1e-9 && Math.abs(j.forecast.probUp - 0.5) < 1e-6, "pure volatility cone centred on price");
 assert(Math.abs(j.forecast.b80[1] / j.forecast.b80[0] - Math.exp(2 * 1.2816 * j.forecast.sdDaily * Math.sqrt(j.T))) < 1e-9, "band width matches sigma");
 await Promise.all(waits);
 assert(sheetCalls[0]?.action === "append" && sheetCalls[0].secret === "s" && sheetCalls[0].row.ticker === "AAPL", "sheet append with secret");
+const R = { company: { name: "Apple" }, scenarios: [{ name: "Tích cực", prob: 0.3, return_pct: 7 }, { name: "Cơ sở", prob: 0.5, return_pct: 1 }, { name: "Tiêu cực", prob: 0.2, return_pct: -8 }], scores: { business: 9, growth: 6, financial: 9, valuation: 5, b2b: 8, b2c: 9, management: 8, risk: 7 }, confidence: "trung bình" };
+r = await call("/api/save", { pin: "2468", result: { ...j, report: R } }); const sj = await r.json();
+assert(r.status === 200 && sj.saved, "save 200 + saved");
+assert(sj.result.total === 76 && sj.result.verdict.cls === "good", "score + verdict after save " + sj.result.total);
+assert(sj.result.forecast.median > j.price, "scenarios shift median up");
+assert(sheetCalls.some(c => c.action === "update" && c.id === j.id && c.row.score === 76), "sheet update with score");
+r = await call("/api/save", { pin: "2468", result: { ...j, report: "x" } }); assert(r.status === 400, "save rejects non-object report");
+r = await call("/api/save", { pin: "2468", result: { ...j, price: -1, report: R } }); assert(r.status === 400, "save rejects bad numbers");
 r = await call("/api/history", { pin: "2468" }); const hj = await r.json();
 assert(hj.rows[0].actual > 0 && hj.rows[0].actualDate >= "2025-12-01", "history fills actual " + hj.rows[0].actual + " " + hj.rows[0].actualDate);
 assert(sheetCalls.some(c => c.action === "setActual"), "setActual written to sheet");
