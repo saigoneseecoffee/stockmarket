@@ -1,9 +1,12 @@
 // Soi Cổ Phiếu 360° — Cloudflare Worker (US stocks only)
 // Holds every secret: Anthropic API key, app PIN, Google Sheet URL + secret.
-// Endpoints (all POST, JSON):  /api/analyze   /api/history   /api/report
+// Free version: no Claude API. The Worker fetches prices (Yahoo/Stooq) and SEC data,
+// computes the 1-month volatility cone, and logs to Google Sheet. The written analysis
+// comes from Claude chat (user copies a prompt, pastes Claude's JSON back) via /api/save.
+// Endpoints (all POST, JSON):  /api/analyze   /api/save   /api/history   /api/report
 //
-// Secrets (wrangler secret put …): ANTHROPIC_API_KEY, APP_PIN, SHEET_URL, SHEET_SECRET
-// Vars (wrangler.toml): ALLOWED_ORIGIN, MODEL, DAILY_LIMIT, SEC_USER_AGENT, MAX_SEARCHES
+// Secrets (wrangler secret put …): APP_PIN, SHEET_URL, SHEET_SECRET
+// Vars (wrangler.toml): ALLOWED_ORIGIN, DAILY_LIMIT, SEC_USER_AGENT
 // Optional KV binding RL: daily usage cap + wrong-PIN lockout.
 
 import { forecast, totalScore, verdictOf, quantStats, addMonth, tradingDaysBetween, isoDate, parseISO } from "./calc.js";
@@ -34,7 +37,7 @@ export default {
     let body;
     try {
       const text = await req.text();
-      if (text.length > 20000) return reply({ error: "too_large" }, 413);
+      if (text.length > 250000) return reply({ error: "too_large" }, 413);
       body = JSON.parse(text);
     } catch { return reply({ error: "bad_json" }, 400); }
 
@@ -52,6 +55,7 @@ export default {
 
     try {
       if (url.pathname === "/api/analyze") return reply(await analyze(body, env, ctx));
+      if (url.pathname === "/api/save") return reply(await save(body, env));
       if (url.pathname === "/api/history") return reply(await history(env));
       if (url.pathname === "/api/report") return reply(await getReport(body, env));
       return reply({ error: "not_found" }, 404);
@@ -81,13 +85,12 @@ async function analyze(body, env, ctx) {
   let checkDate = String(body.checkDate || today);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(checkDate) || checkDate > today) checkDate = today;
   if (checkDate < "2000-01-01") throw fail(400, "bad_date", "Ngày kiểm tra không hợp lệ.");
-  const notes = String(body.notes || "").slice(0, 4000);
-
+  
   // daily cap
   if (env.RL) {
     const k = `day:${today}`; const n = Number(await env.RL.get(k)) || 0;
-    const cap = Number(env.DAILY_LIMIT || 30);
-    if (n >= cap) throw fail(429, "daily_limit", `Đã dùng hết ${cap} lượt phân tích hôm nay.`);
+    const cap = Number(env.DAILY_LIMIT || 100);
+    if (n >= cap) throw fail(429, "daily_limit", `Đã dùng hết ${cap} lượt hôm nay.`);
     await env.RL.put(k, String(n + 1), { expirationTtl: 172800 });
   }
 
@@ -101,30 +104,25 @@ async function analyze(body, env, ctx) {
   const T = Math.max(1, tradingDaysBetween(parseISO(checkDate), target));
   const q = quantStats(quote.dates, quote.closes);
 
-  const claude = await askClaude({ ticker, checkDate, today, target: isoDate(target), T, quote, q, sec, notes }, env);
-  const R = claude.report || {};
-
-  const sdDaily = q && q.n > 20 ? q.sdDaily : (Number(R.annual_volatility_pct) > 0 ? Number(R.annual_volatility_pct) / 100 / Math.sqrt(252) : 0.3 / Math.sqrt(252));
-  const volSrc = q && q.n > 20 ? `tính từ ${Math.min(60, q.n - 1)} phiên gần nhất (Yahoo Finance)` : "AI ước tính";
-  const fc = forecast(quote.price, sdDaily, T, R.scenarios);
-  const total = totalScore(R.scores);
-  const verdict = verdictOf(total, fc.mu);
+  const sdDaily = q && q.n > 20 ? q.sdDaily : 0.3 / Math.sqrt(252);
+  const volSrc = q && q.n > 20 ? `tính từ ${Math.min(60, q.n - 1)} phiên gần nhất (Yahoo Finance)` : "mặc định 30%/năm (thiếu dữ liệu giá)";
+  const fc = forecast(quote.price, sdDaily, T, null);
 
   const id = `${ticker}-${Date.now().toString(36)}`;
   const result = {
     id, ticker, checkDate, targetDate: isoDate(target), T, createdAt: new Date().toISOString(),
     price: quote.price, priceNote: quote.priceNote, currency: quote.currency, exchange: quote.exchange, name: quote.name || sec?.name || ticker,
     history: { d: quote.dates.slice(-120), c: quote.closes.slice(-120) },
-    stats: q, sec, report: R, sources: claude.sources, model: claude.model, searches: claude.searches,
-    forecast: { mu: fc.mu, muRaw: fc.muRaw, clamped: fc.clamped, sdDaily, volSrc, median: fc.median, b50: fc.b50, b80: fc.b80, b95: fc.b95, probUp: fc.probUp, scenarios: fc.scenarios },
-    total, verdict,
+    stats: q, sec, report: null,
+    forecast: { mu: fc.mu, muRaw: fc.muRaw, clamped: fc.clamped, sdDaily, volSrc, median: fc.median, b50: fc.b50, b80: fc.b80, b95: fc.b95, probUp: fc.probUp, scenarios: [] },
+    total: null, verdict: null,
   };
 
   if (env.SHEET_URL && env.SHEET_SECRET) {
     const row = {
       id, createdAt: result.createdAt, ticker, name: result.name, checkDate, targetDate: result.targetDate,
       price: round(quote.price), median: round(fc.median), lo80: round(fc.b80[0]), hi80: round(fc.b80[1]),
-      probUp: Math.round(fc.probUp * 100), score: total ?? "", verdict: verdict.t, confidence: R.confidence || "", model: claude.model,
+      probUp: Math.round(fc.probUp * 100), score: "", verdict: "Chưa có phân tích Claude", confidence: "", model: "chỉ dữ liệu",
     };
     const reportJson = JSON.stringify(result);
     ctx.waitUntil(sheetPost(env, { action: "append", row, report: reportJson.length < 45000 ? reportJson : "" }).catch(() => {}));
@@ -256,100 +254,6 @@ function summarizeConcept(arr, kind, tag) {
   return latest ? { tag, latest: { period: `tại ${latest.end}`, value: latest.val, form: latest.form, filed: latest.filed } } : null;
 }
 
-// ---------------- Claude ----------------
-const SCHEMA = `{"company":{"name":"","ticker":"","exchange":"","sector":"","industry":"","hq":"","founded":"","employees":"","one_liner":"1 câu","description":"3-4 câu"},
-"business_model":{"summary":"","period":"FY...","revenue_streams":[{"name":"","share_pct":0,"type":"B2B|B2C|B2G|Hỗn hợp","note":""}],"geography":[{"region":"","share_pct":0}]},
-"b2b":{"summary":"vai trò trong chuỗi giá trị","customers":[{"name":"","relation":"","importance":"cao|trung bình|thấp"}],"suppliers":[{"name":"","relation":"","importance":""}],"partners":[{"name":"","relation":"","importance":""}],"concentration_risk":"","switching_costs":""},
-"b2c":{"applicable":true,"summary":"","products":[{"name":"","note":""}],"channels":[""],"customer_base":"","brand_strength":"","pricing_power":""},
-"moat":{"rating":"rộng|hẹp|không có","sources":[""],"summary":""},
-"competitors":[{"name":"","ticker":"","note":""}],
-"industry":{"tam":"","growth":"","trends":[""]},
-"management":{"ceo":"","summary":"","insider_ownership":"","capital_allocation":""},
-"risks":[{"title":"","detail":"","severity":"cao|trung bình|thấp"}],
-"esg":"",
-"news":[{"date":"YYYY-MM-DD","title":"","summary":"","impact":"tích cực|tiêu cực|trung tính"}],
-"analyst":{"consensus":"","avg_target":null,"low_target":null,"high_target":null,"num_analysts":null,"as_of":"","source":""},
-"financials":{"period":"","metrics":[{"label":"","value":"","trend":"tăng|giảm|đi ngang|","source":"SEC 10-K|SEC 10-Q|tin tức"}]},
-"growth":{"summary":"","drivers":[""],"catalysts":[{"title":"","detail":"","date":"","impact":"tích cực|tiêu cực|không rõ"}]},
-"valuation":{"summary":"","metrics":[{"label":"P/E","company":"","benchmark":""}],"fair_value_low":null,"fair_value_high":null,"method":""},
-"annual_volatility_pct":null,
-"scenarios":[{"name":"Tích cực","prob":0.25,"return_pct":0,"drivers":""},{"name":"Cơ sở","prob":0.5,"return_pct":0,"drivers":""},{"name":"Tiêu cực","prob":0.25,"return_pct":0,"drivers":""}],
-"scores":{"business":0,"growth":0,"financial":0,"valuation":0,"b2b":0,"b2c":0,"management":0,"risk":0},
-"score_notes":{"business":"","growth":"","financial":"","valuation":"","b2b":"","b2c":"","management":"","risk":""},
-"thesis":{"bull":[""],"bear":[""]},
-"watch_next_month":[""],
-"confidence":"cao|trung bình|thấp",
-"data_gaps":[""]}`;
-
-function buildPrompt(x) {
-  const { ticker, checkDate, today, target, T, quote, q, sec, notes } = x;
-  const pct = v => v == null ? "—" : (v * 100).toFixed(1) + "%";
-  const past = checkDate < today;
-  return `Bạn là chuyên viên phân tích cổ phiếu Mỹ độc lập. Viết TIẾNG VIỆT, rõ ràng, cho nhà đầu tư cá nhân.
-Mã: ${ticker}. Ngày kiểm tra: ${checkDate}. Ngày mục tiêu: ${target} (~${T} phiên). Hôm nay: ${today}.
-${past ? `CHÚ Ý: ngày kiểm tra nằm trong quá khứ — chỉ dùng thông tin công bố TRƯỚC hoặc ĐÚNG ngày ${checkDate}, bỏ qua mọi tin sau ngày đó.\n` : ""}
-GIÁ (${quote.priceNote}): ${quote.price}
-Thống kê giá thật: lợi suất 1T ${pct(q?.r1m)}, 3T ${pct(q?.r3m)}, 6T ${pct(q?.r6m)}, 1N ${pct(q?.r1y)}; SMA20 ${q?.sma20?.toFixed(2) ?? "—"}, SMA50 ${q?.sma50?.toFixed(2) ?? "—"}, SMA200 ${q?.sma200?.toFixed(2) ?? "—"}; đỉnh/đáy 52 tuần ${q?.hi?.toFixed(2)}/${q?.lo?.toFixed(2)}; biến động năm ${pct(q?.annVol)}.
-
-SỐ LIỆU CHÍNH THỨC TỪ SEC EDGAR (đơn vị USD, chính xác — ưu tiên dùng, đừng mâu thuẫn):
-${sec ? JSON.stringify({ name: sec.name, sic: sec.sic, fiscalYearEnd: sec.fiscalYearEnd, facts: sec.facts, recentFilings: sec.filings.map(f => `${f.form} nộp ${f.filed}${f.items ? " items " + f.items : ""}`) }) : "không lấy được"}
-${notes ? `\nGHI CHÚ CỦA NGƯỜI DÙNG:\n"""${notes}"""\n` : ""}
-VIỆC CẦN LÀM:
-1. Dùng công cụ web_search để tra thông tin MỚI: tin tức 30 ngày gần nhất, kết quả quý gần nhất và dự báo (guidance), ngày công bố kết quả tiếp theo, đồng thuận & giá mục tiêu của giới phân tích, khách hàng/nhà cung cấp/đối tác lớn (theo 10-K), cơ cấu doanh thu theo mảng, đối thủ, P/E & các chỉ số định giá hiện tại so với ngành. Ưu tiên nguồn gốc: sec.gov, trang quan hệ nhà đầu tư của công ty, Reuters, AP, CNBC, WSJ, Bloomberg, Barron's, Yahoo Finance.
-2. Tính các chỉ số tài chính từ số liệu SEC ở trên (doanh thu, tăng trưởng, biên lợi nhuận, FCF = dòng tiền HĐKD − capex, nợ/vốn chủ…), ghi rõ kỳ.
-3. Không bịa: không chắc thì để null hoặc ghi "ước tính". Mỗi số phải kèm kỳ.
-4. Kịch bản 1 tháng: đúng 3 kịch bản, xác suất cộng = 1, return_pct là % thay đổi giá đến ngày mục tiêu, hợp lý với biến động 1 tháng thực tế (${pct(q ? q.sdDaily * Math.sqrt(T) : null)} là 1 độ lệch chuẩn). Tính đến sự kiện trong 1 tháng tới (báo cáo KQKD, Fed, ra mắt sản phẩm…).
-5. scores 0-10 (10 tốt nhất; "risk": 10 = rất an toàn; "b2c"/"b2b": null nếu công ty không có mảng đó). Giới hạn: ≤6 mục mỗi danh sách, ≤6 rủi ro, ≤5 đối thủ, ≤6 tin.
-
-KẾT THÚC bằng DUY NHẤT một khối JSON (không markdown, không chữ nào sau nó) đúng cấu trúc:
-${SCHEMA}`;
-}
-
-async function askClaude(x, env) {
-  if (!env.ANTHROPIC_API_KEY) throw fail(500, "no_api_key", "Máy chủ chưa cấu hình khoá API Claude.");
-  const model = env.MODEL || "claude-sonnet-5-5";
-  const tools = [{ type: "web_search_20250305", name: "web_search", max_uses: Number(env.MAX_SEARCHES || 8), user_location: { type: "approximate", country: "US", timezone: "America/New_York" } }];
-  const messages = [{ role: "user", content: buildPrompt(x) }];
-  const content = []; let searches = 0;
-  for (let round = 0; round < 4; round++) {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model, max_tokens: 16000, tools, messages }),
-    });
-    if (!r.ok) {
-      const t = await r.text().catch(() => "");
-      if (r.status === 429 || r.status === 529) throw fail(503, "claude_busy", "Claude đang quá tải, thử lại sau ít phút.");
-      throw fail(502, "claude_error", `Claude API lỗi (${r.status}). ${t.slice(0, 160)}`);
-    }
-    const j = await r.json();
-    content.push(...(j.content || []));
-    searches += j.usage?.server_tool_use?.web_search_requests || 0;
-    if (j.stop_reason === "pause_turn") { messages.push({ role: "assistant", content: j.content }); continue; }
-    break;
-  }
-  // sources: search results + citations
-  const seen = new Map();
-  for (const b of content) {
-    if (b.type === "web_search_tool_result" && Array.isArray(b.content)) for (const s of b.content) if (s.url && !seen.has(s.url)) seen.set(s.url, { url: s.url, title: s.title || s.url, age: s.page_age || "", cited: false });
-    if (b.type === "text" && Array.isArray(b.citations)) for (const c of b.citations) if (c.url) { const s = seen.get(c.url) || { url: c.url, title: c.title || c.url, age: "" }; s.cited = true; seen.set(c.url, s); }
-  }
-  const sources = [...seen.values()].filter(s => /^https:\/\//.test(s.url)).sort((a, b) => (b.cited - a.cited)).slice(0, 25);
-  // final JSON: the text after the last tool result
-  let lastTool = -1; content.forEach((b, i) => { if (b.type === "web_search_tool_result" || b.type === "server_tool_use") lastTool = i; });
-  const finalText = content.slice(lastTool + 1).filter(b => b.type === "text").map(b => b.text).join("");
-  const report = extractJSON(finalText) || extractJSON(content.filter(b => b.type === "text").map(b => b.text).join(""));
-  if (!report) throw fail(502, "bad_report", "Claude trả về sai định dạng. Bấm Phân tích lại.");
-  return { report, sources, model, searches };
-}
-function extractJSON(t) {
-  if (!t) return null;
-  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const cands = [fence?.[1], t.slice(t.indexOf("{"), t.lastIndexOf("}") + 1)].filter(Boolean);
-  for (const c of cands) { try { const v = JSON.parse(c); if (v && typeof v === "object") return v; } catch { } }
-  return null;
-}
-
 // ---------------- Google Sheet ----------------
 async function sheetPost(env, payload) {
   const r = await fetch(env.SHEET_URL, { method: "POST", headers: { "content-type": "text/plain;charset=utf-8" }, body: JSON.stringify({ ...payload, secret: env.SHEET_SECRET }), redirect: "follow" });
@@ -375,6 +279,33 @@ async function history(env) {
   }
   return { rows };
 }
+// Save Claude's analysis (pasted by the user) and recompute the forecast with its scenarios.
+async function save(body, env) {
+  const r = body.result;
+  if (!r || typeof r !== "object") throw fail(400, "bad_result", "Thiếu dữ liệu báo cáo.");
+  const id = String(r.id || "");
+  if (!/^[A-Z.\-]{1,9}-[a-z0-9]{6,12}$/.test(id)) throw fail(400, "bad_id", "Mã báo cáo không hợp lệ.");
+  const R = r.report;
+  if (!R || typeof R !== "object" || Array.isArray(R)) throw fail(400, "bad_report", "Phân tích của Claude không đúng định dạng.");
+  const price = Number(r.price), sd = Number(r.forecast?.sdDaily), T = Number(r.T);
+  if (!(price > 0 && sd > 0 && sd < 1 && T > 0 && T < 40)) throw fail(400, "bad_numbers", "Số liệu không hợp lệ.");
+  const fc = forecast(price, sd, T, R.scenarios);
+  const total = totalScore(R.scores);
+  const verdict = verdictOf(total, fc.mu);
+  const result = { ...r, report: R, total, verdict, analyzedAt: new Date().toISOString(),
+    forecast: { ...r.forecast, mu: fc.mu, muRaw: fc.muRaw, clamped: fc.clamped, median: fc.median, b50: fc.b50, b80: fc.b80, b95: fc.b95, probUp: fc.probUp, scenarios: fc.scenarios } };
+  const json = JSON.stringify(result);
+  if (json.length > 200000) throw fail(413, "too_large", "Báo cáo quá dài.");
+  let saved = false;
+  if (env.SHEET_URL && env.SHEET_SECRET) {
+    const res = await sheetPost(env, { action: "update", id, row: { median: round(fc.median), lo80: round(fc.b80[0]), hi80: round(fc.b80[1]),
+      probUp: Math.round(fc.probUp * 100), score: total ?? "", verdict: verdict.t, confidence: String(R.confidence || ""), model: "Claude chat" },
+      report: json.length < 45000 ? json : "" }).catch(() => null);
+    saved = !!res?.ok;
+  }
+  return { result, saved };
+}
+
 async function getReport(body, env) {
   const id = String(body.id || "");
   if (!/^[A-Z.\-]{1,9}-[a-z0-9]{6,12}$/.test(id)) throw fail(400, "bad_id", "Mã báo cáo không hợp lệ.");

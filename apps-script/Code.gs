@@ -20,6 +20,7 @@ function doPost(e) {
   lock.waitLock(10000);
   try {
     if (body.action === 'append') return out(append(body.row || {}, String(body.report || '')));
+    if (body.action === 'update') return out(update(String(body.id || ''), body.row || {}, String(body.report || '')));
     if (body.action === 'list') return out({ rows: list() });
     if (body.action === 'get') return out(getReport(String(body.id || '')));
     if (body.action === 'setActual') return out(setActual(String(body.id || ''), Number(body.actual), String(body.actualDate || '')));
@@ -53,6 +54,19 @@ function list() {
   const tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
   const vals = sh.getRange(start, 1, n - start + 1, KEYS.length).getValues();
   return vals.reverse().map(r => { const o = {}; KEYS.forEach((k, i) => { o[k] = r[i] instanceof Date ? Utilities.formatDate(r[i], tz, 'yyyy-MM-dd') : r[i]; }); return o; });
+}
+function update(id, row, report) {
+  const sh = sheet(SHEET_NAME, HEADERS);
+  const f = sh.getRange('A:A').createTextFinder(id).matchEntireCell(true).findNext();
+  if (!f) return { error: 'not_found' };
+  sh.getRange(f.getRow(), 8, 1, 8).setValues([[cleanNum(row.median), cleanNum(row.lo80), cleanNum(row.hi80), cleanNum(row.probUp), cleanNum(row.score),
+    clean(row.verdict, 80), clean(row.confidence, 20), clean(row.model, 40)]]);
+  if (report && report.length < 49000) {
+    const rs = sheet(REPORT_SHEET, ['id', 'report']);
+    const g = rs.getRange('A:A').createTextFinder(id).matchEntireCell(true).findNext();
+    if (g) rs.getRange(g.getRow(), 2).setValue(report); else rs.appendRow([id, report]);
+  }
+  return { ok: true };
 }
 function getReport(id) {
   const sh = sheet(REPORT_SHEET, ['id', 'report']);

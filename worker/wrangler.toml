@@ -5,10 +5,8 @@ compatibility_date = "2026-11-01"
 [vars]
 # Trang GitHub Pages được phép gọi Worker (sửa thành link thật của bạn, cách nhau bởi dấu phẩy)
 ALLOWED_ORIGIN = "https://saigoneseecoffee.github.io"
-# Model Claude: claude-sonnet-5-5 (rẻ hơn) hoặc claude-opus-5-5 (sâu hơn, đắt hơn)
-MODEL = "claude-sonnet-5-5"
-MAX_SEARCHES = "8"
-DAILY_LIMIT = "30"
+# Số lần lấy dữ liệu tối đa mỗi ngày (bảo vệ khỏi bị gọi quá nhiều)
+DAILY_LIMIT = "100"
 # SEC yêu cầu User-Agent có tên + email liên hệ
 SEC_USER_AGENT = "Saigonesee StockCheck THAY_BANG_EMAIL_CUA_BAN@gmail.com"
 
