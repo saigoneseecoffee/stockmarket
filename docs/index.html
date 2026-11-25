@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soi Cổ Phiếu 360° — Cổ phiếu Mỹ</title>
+<meta name="description" content="Đánh giá toàn diện cổ phiếu Mỹ: mô hình kinh doanh, B2B, B2C, tài chính SEC, định giá, tin tức và vùng giá dự kiến sau 1 tháng.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f6fa; --surface:#ffffff; --surface-2:#eef1f6; --line:#dde2ea;
+  --text:#14181f; --text-2:#5b6472; --text-3:#8a93a1;
+  --accent:#257de0; --accent-ink:#ffffff;
+  --s1:#257de0; --s2:#f47230; --s3:#00b894; --s4:#f2a600;
+  --good:#008a17; --warn:#b87900; --bad:#d93536;
+  --good-bg:#e5f5e8; --warn-bg:#fdf3dc; --bad-bg:#fde8e8;
+  --band95:rgba(37,125,224,.10); --band80:rgba(37,125,224,.18); --band50:rgba(37,125,224,.30);
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 16px rgba(16,24,40,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --bg:#0f1218; --surface:#171b23; --surface-2:#1f2430; --line:#2a303d;
+    --text:#eef1f5; --text-2:#a3abb8; --text-3:#727b8a;
+    --accent:#338ced; --accent-ink:#ffffff;
+    --s1:#338ced; --s2:#e76624; --s3:#00a888; --s4:#d28e05;
+    --good:#2fbf4a; --warn:#e0a52a; --bad:#eb6263;
+    --good-bg:#14301b; --warn-bg:#33270c; --bad-bg:#3a1819;
+    --band95:rgba(51,140,237,.12); --band80:rgba(51,140,237,.22); --band50:rgba(51,140,237,.36);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Be Vietnam Pro",system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.wrap{max-width:900px;margin:0 auto;padding:16px 14px 80px}
+.num{font-variant-numeric:tabular-nums}
+h1{font-size:26px;line-height:1.2;margin:8px 0 4px;letter-spacing:-.02em}
+h2{font-size:18px;margin:0 0 10px;letter-spacing:-.01em}
+h3{font-size:15px;margin:14px 0 6px}
+p{margin:6px 0}
+.sub{color:var(--text-2);font-size:14px}
+.disclaimer{font-size:12.5px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:10px 0 14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;box-shadow:var(--shadow)}
+label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin:0 0 5px}
+input,select,textarea{width:100%;font:inherit;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+textarea{min-height:80px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.grid{display:grid;gap:12px}
+@media(min-width:620px){.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}}
+.btn{appearance:none;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;padding:12px 18px;min-height:46px;cursor:pointer}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--line);font-weight:600}
+.btn.small{min-height:36px;padding:6px 12px;font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hint{font-size:12.5px;color:var(--text-3);margin-top:4px}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:12px;background:var(--surface-2);font-size:13.5px;color:var(--text-2)}
+.drop input{background:transparent;border:0;padding:6px 0;min-height:0}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2)}
+.pill.good{background:var(--good-bg);color:var(--good);border-color:transparent}
+.pill.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.pill.bad{background:var(--bad-bg);color:var(--bad);border-color:transparent}
+.status{font-size:14px;color:var(--text-2);padding:10px 0}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+.nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin:0 -2px;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{flex:none;text-decoration:none;color:var(--text-2);font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.hero{display:grid;gap:14px}
+@media(min-width:700px){.hero{grid-template-columns:1.1fr 1fr}}
+.kpi{background:var(--surface-2);border-radius:12px;padding:12px}
+.kpi .k{font-size:12px;color:var(--text-2);font-weight:600}
+.kpi .v{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.kpi .d{font-size:13px;color:var(--text-2)}
+.verdict{border-radius:14px;padding:14px;display:flex;gap:12px;align-items:flex-start}
+.verdict.good{background:var(--good-bg)}.verdict.warn{background:var(--warn-bg)}.verdict.bad{background:var(--bad-bg)}
+.verdict .ic{font-size:22px;line-height:1}
+.verdict .t{font-weight:800;font-size:17px}
+.verdict.good .t{color:var(--good)}.verdict.warn .t{color:var(--warn)}.verdict.bad .t{color:var(--bad)}
+.scorering{display:flex;align-items:center;gap:14px}
+.list{margin:6px 0;padding-left:18px}
+.list li{margin:4px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--text-2);font-weight:600}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+.chart{width:100%;height:auto;display:block;touch-action:pan-y}
+.chartbox{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;padding:8px 10px;font-size:12.5px;min-width:140px;display:none;z-index:3}
+.tip b{font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--text-2);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.bar-row{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:10px;align-items:center;margin:7px 0;font-size:13.5px}
+.bar-track{height:12px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--s1)}
+.muted{color:var(--text-3)}
+.tag{font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--surface-2);color:var(--text-2);margin-left:6px;white-space:nowrap}
+.two{display:grid;gap:12px}
+@media(min-width:620px){.two{grid-template-columns:1fr 1fr}}
+.box{background:var(--surface-2);border-radius:12px;padding:12px}
+.box h3{margin-top:0}
+.hist-item{display:grid;gap:6px;padding:12px 0;border-bottom:1px solid var(--line)}
+.hidden{display:none!important}
+details summary{cursor:pointer;font-weight:600;color:var(--text-2);font-size:13.5px}
+.qa-a{white-space:pre-wrap;background:var(--surface-2);border-radius:12px;padding:12px;margin-top:10px;font-size:14px}
+.src{font-size:12.5px;color:var(--text-2)}
+</style>
+<style>
+.news-item{padding:10px 0;border-bottom:1px solid var(--line)}
+.news-item:last-child{border-bottom:0}
+a{color:var(--accent)}
+.srcs li{margin:6px 0;font-size:13.5px;word-break:break-word}
+.elapsed{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="row" style="justify-content:space-between">
+      <span class="pill">📊 Soi Cổ Phiếu 360° · 🇺🇸 Mỹ</span>
+      <button class="btn ghost small" id="btnHistory" type="button">Lịch sử kiểm tra</button>
+    </div>
+    <h1>Đánh giá toàn diện một công ty Mỹ trước khi đầu tư</h1>
+    <p class="sub">Claude tự tra tin tức mới, số liệu chính thức SEC và giá thật — rồi chấm điểm mô hình kinh doanh, B2B, B2C, tài chính, định giá, rủi ro và ước tính vùng giá sau 1 tháng.</p>
+    <div class="disclaimer">⚠️ Chỉ để tham khảo / học tập, <b>không phải lời khuyên đầu tư</b>. Giá sau 1 tháng là <b>vùng xác suất</b>, không phải lời hứa. Giá từ Yahoo Finance có thể trễ ~15 phút.</div>
+  </header>
+
+  <form class="card" id="form" autocomplete="off">
+    <h2>Nhập cổ phiếu cần soi</h2>
+    <div class="grid g3">
+      <div><label for="ticker">Mã cổ phiếu Mỹ</label><input id="ticker" placeholder="VD: AAPL, NVDA, COST" required maxlength="9" style="text-transform:uppercase" autocapitalize="characters"></div>
+      <div><label for="checkDate">Ngày kiểm tra</label><input id="checkDate" type="date" required></div>
+      <div><label for="pin">Mã PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="current-password" required maxlength="40"></div>
+    </div>
+    <label class="row" style="margin-top:8px;font-weight:500;gap:6px"><input type="checkbox" id="rememberPin" style="width:auto;min-height:0"> Nhớ PIN trên máy này</label>
+    <details style="margin-top:10px">
+      <summary>Thêm ghi chú cho Claude (tuỳ chọn)</summary>
+      <textarea id="notes" style="margin-top:8px" placeholder="VD: Tôi định giữ 1 tháng; quan tâm rủi ro thuế quan; so sánh thêm với AMD…"></textarea>
+    </details>
+    <p class="hint" id="pastHint"></p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btnRun" type="submit">🔍 Phân tích toàn diện</button>
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+    </div>
+  </form>
+
+  <section id="report" class="hidden" aria-label="Báo cáo"></section>
+
+  <section id="history" class="card hidden">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Lịch sử kiểm tra</h2><button class="btn ghost small" type="button" id="btnHistClose">Đóng</button></div>
+    <p class="sub">Lưu trên Google Sheet. Sau ngày mục tiêu, giá thực tế được điền tự động để chấm xem dự báo có trúng vùng 80% không.</p>
+    <div id="histSummary"></div>
+    <div id="histList"><p class="muted">Đang tải…</p></div>
+  </section>
+</div>
+
+<script type="module">
+import { forecastPath, futureTradingDates, parseISO, isoDate, CRIT } from "./calc.js";
+
+// ===== Cấu hình: dán link Worker của bạn vào đây =====
+const API_BASE = "https://soicophieu.YOUR-SUBDOMAIN.workers.dev";
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const num = v => { if (v == null || v === "") return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const safeUrl = u => /^https:\/\//i.test(String(u || "")) ? String(u) : null;
+const pad = n => String(n).padStart(2, "0");
+const vi = s => { if (!s) return "—"; const d = typeof s === "string" ? parseISO(s) : s; return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`; };
+const fmtPrice = v => v == null || !Number.isFinite(v) ? "—" : "$" + new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+const fmtPct = (v, sign = true) => v == null || !Number.isFinite(v) ? "—" : (sign && v > 0 ? "+" : "") + (v * 100).toFixed(1).replace(".", ",") + "%";
+const fmtBig = v => { if (v == null) return "—"; const a = Math.abs(v); const s = v < 0 ? "−" : ""; return a >= 1e9 ? `${s}$${(a / 1e9).toFixed(2)} tỷ` : a >= 1e6 ? `${s}$${(a / 1e6).toFixed(1)} triệu` : `${s}$${a.toLocaleString("en-US")}`; };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { } }
+function todayNY() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+
+async function api(path, payload, signal) {
+  const pin = $("#pin").value.trim();
+  const r = await fetch(API_BASE + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...payload, pin }), signal });
+  let j = null; try { j = await r.json(); } catch { }
+  if (!r.ok) { const e = new Error(j?.message || `Lỗi ${r.status}`); e.code = j?.error; throw e; }
+  return j;
+}
+
+// ---------- form ----------
+const today = todayNY();
+$("#checkDate").value = today; $("#checkDate").max = today;
+const savedPin = lsGet("scp_pin", ""); if (savedPin) { $("#pin").value = savedPin; $("#rememberPin").checked = true; }
+$("#checkDate").addEventListener("change", e => { $("#pastHint").textContent = e.target.value < today ? "Ngày trong quá khứ: giá dùng là giá đóng cửa ngày đó; Claude được dặn chỉ dùng tin trước ngày này (không đảm bảo tuyệt đối)." : ""; });
+
+$("#form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const ticker = $("#ticker").value.trim().toUpperCase();
+  if (!/^[A-Z]{1,6}([.\-][A-Z]{1,2})?$/.test(ticker)) { $("#status").textContent = "Mã không hợp lệ (VD: AAPL, BRK.B)."; return; }
+  if ($("#rememberPin").checked) lsSet("scp_pin", $("#pin").value.trim()); else lsSet("scp_pin", "");
+  const btn = $("#btnRun"); btn.disabled = true;
+  const t0 = Date.now(); const st = $("#status");
+  const tick = () => { const s = Math.round((Date.now() - t0) / 1000); st.innerHTML = `<span class="spinner"></span>Đang lấy giá, số liệu SEC và để Claude tra tin tức… <span class="elapsed">${s}s</span> (thường 1–3 phút)`; };
+  tick(); const timer = setInterval(tick, 1000);
+  try {
+    const res = await api("/api/analyze", { ticker, checkDate: $("#checkDate").value, notes: $("#notes").value.trim() });
+    clearInterval(timer); st.textContent = "Xong ✓";
+    renderReport(res);
+    $("#report").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) {
+    clearInterval(timer);
+    st.textContent = e.name === "TypeError" ? "Không kết nối được máy chủ. Kiểm tra mạng hoặc cấu hình API_BASE." : "❌ " + e.message;
+  } finally { btn.disabled = false; }
+});
+
+// ---------- history ----------
+$("#btnHistory").addEventListener("click", loadHistory);
+$("#btnHistClose").addEventListener("click", () => $("#history").classList.add("hidden"));
+async function loadHistory() {
+  const box = $("#histList"); $("#history").classList.remove("hidden"); $("#history").scrollIntoView({ behavior: "smooth" });
+  if (!$("#pin").value.trim()) { box.innerHTML = '<p class="muted">Nhập mã PIN ở trên trước.</p>'; return; }
+  box.innerHTML = '<p class="muted"><span class="spinner"></span>Đang tải từ Google Sheet…</p>';
+  try {
+    const { rows = [], note } = await api("/api/history", {});
+    if (note) { box.innerHTML = `<p class="muted">${esc(note)}</p>`; return; }
+    if (!rows.length) { box.innerHTML = '<p class="muted">Chưa có lần kiểm tra nào.</p>'; $("#histSummary").innerHTML = ""; return; }
+    const graded = rows.filter(r => num(r.actual) > 0);
+    const hits = graded.filter(r => num(r.actual) >= num(r.lo80) && num(r.actual) <= num(r.hi80)).length;
+    $("#histSummary").innerHTML = graded.length ? `<div class="kpi" style="margin-bottom:8px"><div class="k">Độ chính xác dự báo</div><div class="v num">${hits}/${graded.length} trúng vùng 80%</div><div class="d">Mô hình chuẩn sẽ trúng khoảng 80% số lần.</div></div>` : "";
+    box.innerHTML = rows.map(r => {
+      const act = num(r.actual);
+      let res = '<span class="muted" style="font-size:12.5px">Chưa đến ngày mục tiêu</span>';
+      if (act > 0) { const ok = act >= num(r.lo80) && act <= num(r.hi80); res = `<span class="pill ${ok ? "good" : "bad"}">${ok ? "✓ Trúng vùng 80%" : "✗ Ngoài vùng 80%"}</span> <span class="sub num">Thực tế ${fmtPrice(act)} · lệch ${fmtPct(act / num(r.median) - 1)}</span>`; }
+      return `<div class="hist-item"><div class="row" style="justify-content:space-between"><b>${esc(r.ticker)} <span class="muted" style="font-weight:500">${esc(r.name || "")}</span></b><span class="sub">${vi(String(r.checkDate))} → ${vi(String(r.targetDate))}</span></div>
+        <div class="sub num">Giá lúc soi ${fmtPrice(num(r.price))} · dự kiến ${fmtPrice(num(r.median))} (80%: ${fmtPrice(num(r.lo80))} – ${fmtPrice(num(r.hi80))}) · điểm ${esc(r.score ?? "—")}/100 · ${esc(r.verdict || "")}</div>
+        <div class="row">${res}<button class="btn ghost small" type="button" data-open="${esc(r.id)}">Mở báo cáo</button></div></div>`;
+    }).join("");
+  } catch (e) { box.innerHTML = `<p class="muted">❌ ${esc(e.message)}</p>`; }
+}
+$("#histList").addEventListener("click", async e => {
+  const id = e.target.dataset?.open; if (!id) return;
+  e.target.disabled = true; e.target.textContent = "Đang mở…";
+  try { const r = await api("/api/report", { id }); renderReport(r); $("#history").classList.add("hidden"); $("#report").scrollIntoView({ behavior: "smooth" }); }
+  catch (err) { e.target.textContent = err.message; }
+});
+
+// ---------- report ----------
+function sevCls(s) { s = String(s || "").toLowerCase(); return s.startsWith("cao") || s.includes("tiêu cực") ? "bad" : s.startsWith("trung") || s.includes("không rõ") ? "warn" : "good"; }
+function sevIcon(c) { return c === "bad" ? "▲" : c === "warn" ? "■" : "●"; }
+function list(arr) { arr = (arr || []).filter(Boolean); return arr.length ? `<ul class="list">${arr.map(x => `<li>${esc(typeof x === "string" ? x : JSON.stringify(x))}</li>`).join("")}</ul>` : '<p class="muted">—</p>'; }
+function section(id, title, inner, note) { return `<div class="card" id="${id}"><h2>${title}</h2>${inner}${note ? `<p class="src">${note}</p>` : ""}</div>`; }
+
+function secTable(sec) {
+  const f = sec?.facts || {}; const rows = [];
+  const flow = [["revenue", "Doanh thu"], ["grossProfit", "Lợi nhuận gộp"], ["operatingIncome", "Lợi nhuận hoạt động"], ["netIncome", "Lợi nhuận ròng"], ["operatingCashFlow", "Dòng tiền HĐKD"], ["capex", "Chi đầu tư (capex)"]];
+  for (const [k, label] of flow) {
+    const a = f[k]?.annual || []; if (!a.length) continue;
+    const g = a[1] ? a[0].value / a[1].value - 1 : null;
+    rows.push(`<tr><td>${label}</td><td class="r">${fmtBig(a[0].value)}<div class="muted" style="font-size:11.5px">${esc(a[0].period)}</div></td><td class="r">${a[1] ? fmtBig(a[1].value) : "—"}</td><td class="r">${g == null ? "—" : `<span class="pill ${g >= 0 ? "good" : "bad"}">${g >= 0 ? "▲" : "▼"} ${fmtPct(g)}</span>`}</td></tr>`);
+  }
+  const eps = f.epsDiluted?.annual || [];
+  if (eps.length) rows.push(`<tr><td>EPS pha loãng</td><td class="r">$${eps[0].value}<div class="muted" style="font-size:11.5px">${esc(eps[0].period)}</div></td><td class="r">${eps[1] ? "$" + eps[1].value : "—"}</td><td class="r">${eps[1] ? fmtPct(eps[0].value / eps[1].value - 1) : "—"}</td></tr>`);
+  for (const [k, label] of [["cash", "Tiền mặt"], ["longTermDebt", "Nợ dài hạn"], ["equity", "Vốn chủ sở hữu"]]) {
+    const l = f[k]?.latest; if (l) rows.push(`<tr><td>${label}</td><td class="r">${fmtBig(l.value)}<div class="muted" style="font-size:11.5px">${esc(l.period)} · ${esc(l.form)}</div></td><td class="r">—</td><td class="r">—</td></tr>`);
+  }
+  const ocf = f.operatingCashFlow?.annual?.[0], cx = f.capex?.annual?.[0];
+  if (ocf && cx && ocf.period === cx.period) rows.push(`<tr><td><b>Dòng tiền tự do (FCF)</b></td><td class="r"><b>${fmtBig(ocf.value - cx.value)}</b><div class="muted" style="font-size:11.5px">${esc(ocf.period)}</div></td><td class="r">—</td><td class="r">—</td></tr>`);
+  const q = f.revenue?.lastQ, qy = f.revenue?.lastQYearAgo;
+  if (q) rows.push(`<tr><td>Doanh thu quý gần nhất</td><td class="r">${fmtBig(q.value)}<div class="muted" style="font-size:11.5px">${esc(q.period)}</div></td><td class="r">${qy ? fmtBig(qy.value) : "—"}</td><td class="r">${qy ? fmtPct(q.value / qy.value - 1) : "—"}</td></tr>`);
+  if (!rows.length) return "";
+  return `<h3>Số liệu chính thức từ SEC EDGAR</h3><div class="tablewrap"><table><thead><tr><th>Chỉ số</th><th class="r">Kỳ gần nhất</th><th class="r">Kỳ trước</th><th class="r">Thay đổi</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+}
+
+function renderReport(r) {
+  const R = r.report || {}, co = R.company || {}, fc = r.forecast, v = r.verdict || {};
+  const chg = fc.median / r.price - 1;
+  const nav = [["s-sum", "Tổng kết"], ["s-fc", "Giá 1 tháng"], ["s-news", "Tin mới"], ["s-biz", "Mô hình KD"], ["s-b2b", "B2B"], ["s-b2c", "B2C"], ["s-fin", "Tài chính"], ["s-val", "Định giá"], ["s-grow", "Tiềm năng"], ["s-moat", "Cạnh tranh"], ["s-mgmt", "Lãnh đạo"], ["s-risk", "Rủi ro"], ["s-score", "Chấm điểm"], ["s-src", "Nguồn"]];
+  let h = `<nav class="nav" aria-label="Mục lục">${nav.map(([i, t]) => `<a href="#${i}">${t}</a>`).join("")}</nav>`;
+
+  h += `<div class="card" id="s-sum">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><div class="sub">${esc(r.exchange || co.exchange || "")} · ${esc(co.sector || r.sec?.sic || "")}${co.industry ? " · " + esc(co.industry) : ""}</div>
+      <h1 style="margin:2px 0">${esc(co.name || r.name)} <span class="tag" style="font-size:14px">${esc(r.ticker)}</span></h1>
+      <p class="sub">${esc(co.one_liner || "")}</p></div>
+      <button class="btn ghost small" type="button" id="btnCopy">Sao chép tóm tắt</button>
+    </div>
+    <div class="hero" style="margin-top:10px">
+      <div>
+        <div class="verdict ${esc(v.cls)}"><div class="ic" aria-hidden="true">${esc(v.ic)}</div><div><div class="t">${esc(v.t)}</div><div style="font-size:14px">${esc(v.d)}</div></div></div>
+        <div class="scorering" style="margin-top:12px">${ringSVG(r.total)}<div><div style="font-weight:700">Điểm tổng hợp ${r.total ?? "—"}/100</div><div class="sub">8 tiêu chí có trọng số · độ tin cậy: ${esc(R.confidence || "—")}</div></div></div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+        <div class="kpi"><div class="k">Giá ngày ${vi(r.checkDate)}</div><div class="v num">${fmtPrice(r.price)}</div><div class="d">${esc(r.priceNote)}</div></div>
+        <div class="kpi"><div class="k">Dự kiến ${vi(r.targetDate)}</div><div class="v num">${fmtPrice(fc.median)}</div><div class="d num">${fmtPct(chg)} (trung vị)</div></div>
+        <div class="kpi"><div class="k">Vùng 80% khả năng</div><div class="v num" style="font-size:17px">${fmtPrice(fc.b80[0])} – ${fmtPrice(fc.b80[1])}</div><div class="d num">${fmtPct(fc.b80[0] / r.price - 1)} … ${fmtPct(fc.b80[1] / r.price - 1)}</div></div>
+        <div class="kpi"><div class="k">Xác suất giá cao hơn hiện tại</div><div class="v num">${Math.round(fc.probUp * 100)}%</div><div class="d">theo mô hình</div></div>
+      </div>
+    </div>
+    ${R.analyst && (R.analyst.consensus || R.analyst.avg_target) ? `<div class="box" style="margin-top:12px"><b>Giới phân tích:</b> ${esc(R.analyst.consensus || "")}${num(R.analyst.avg_target) ? ` · giá mục tiêu TB <b class="num">${fmtPrice(num(R.analyst.avg_target))}</b>` : ""}${num(R.analyst.low_target) && num(R.analyst.high_target) ? ` (${fmtPrice(num(R.analyst.low_target))} – ${fmtPrice(num(R.analyst.high_target))})` : ""}${R.analyst.num_analysts ? ` · ${esc(R.analyst.num_analysts)} chuyên gia` : ""} <span class="muted">${esc(R.analyst.source || "")} ${esc(R.analyst.as_of || "")}</span><div class="muted" style="font-size:12.5px">Giá mục tiêu của giới phân tích thường cho 12 tháng, không phải 1 tháng.</div></div>` : ""}
+    ${R.thesis ? `<div class="two" style="margin-top:12px"><div class="box"><h3>👍 Lý do nên mua</h3>${list(R.thesis.bull)}</div><div class="box"><h3>👎 Lý do nên tránh</h3>${list(R.thesis.bear)}</div></div>` : ""}
+  </div>`;
+
+  const sc = fc.scenarios || [];
+  h += section("s-fc", "🎯 Giá dự kiến sau 1 tháng",
+    `<p class="sub">Ngày mục tiêu <b>${vi(r.targetDate)}</b> (~${r.T} phiên). Vùng màu là khoảng xác suất 50% / 80% / 95%; đường nét đứt là trung vị. Chạm / rê vào biểu đồ để xem từng ngày.</p>
+     <div class="chartbox" id="fanBox"></div>
+     <div class="legend"><span><i style="background:var(--text)"></i>Giá thật (Yahoo)</span><span><i style="background:var(--band50)"></i>50%</span><span><i style="background:var(--band80)"></i>80%</span><span><i style="background:var(--band95)"></i>95%</span></div>
+     <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Vùng</th><th class="r">Thấp</th><th class="r">Cao</th></tr></thead><tbody>
+     ${[["50%", fc.b50], ["80%", fc.b80], ["95%", fc.b95]].map(([k, b]) => `<tr><td>${k} khả năng</td><td class="r">${fmtPrice(b[0])}</td><td class="r">${fmtPrice(b[1])}</td></tr>`).join("")}</tbody></table></div>
+     ${sc.length ? `<h3>3 kịch bản của Claude</h3>${sc.map(s => `<div class="bar-row"><div><b>${esc(s.name)}</b> <span class="muted num">· ${Math.round(s.p * 100)}%</span><div class="muted" style="font-size:12.5px">${esc(s.drivers || "")}</div></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(s.p * 100)}%;background:${s.r >= 0 ? "var(--good)" : "var(--bad)"}"></div></div><div class="num" style="font-weight:700">${s.r >= 0 ? "▲" : "▼"} ${fmtPct(s.r / 100)} · ${fmtPrice(r.price * (1 + s.r / 100))}</div></div>`).join("")}` : ""}
+     ${(R.watch_next_month || []).length ? `<h3>Cần theo dõi trong 1 tháng tới</h3>${list(R.watch_next_month)}` : ""}`,
+    `Cách tính: mô hình log-normal, độ biến động ${fmtPct(fc.sdDaily * Math.sqrt(252), false)}/năm (${esc(fc.volSrc)}). Tâm dự báo dịch theo kỳ vọng có trọng số của 3 kịch bản${fc.clamped ? " — đã giới hạn trong ±1 độ lệch chuẩn vì kịch bản quá mạnh" : ""}. Không trừ ngày lễ. Giá thật có thể nằm ngoài cả vùng 95% khi có tin bất ngờ.`);
+
+  h += section("s-news", "📰 Tin mới nhất",
+    (R.news || []).map(n => { const c = sevCls(n.impact); return `<div class="news-item"><div class="row" style="justify-content:space-between"><b>${esc(n.title)}</b><span class="pill ${c}">${sevIcon(c)} ${esc(n.impact || "")}</span></div><div class="muted" style="font-size:12.5px">${esc(n.date || "")}</div><p>${esc(n.summary || "")}</p></div>`; }).join("") || '<p class="muted">Không có tin nổi bật.</p>',
+    "Claude tìm trên web; xem link gốc ở mục Nguồn.");
+
+  const bm = R.business_model || {};
+  h += section("s-biz", "🏢 Tổng quan & mô hình kinh doanh",
+    `<p>${esc(co.description || "")}</p>
+     <div class="grid g4" style="margin:10px 0">${[["Trụ sở", co.hq], ["Thành lập", co.founded], ["Nhân sự", co.employees], ["Năm tài chính kết thúc", r.sec?.fiscalYearEnd ? r.sec.fiscalYearEnd.slice(2) + "/" + r.sec.fiscalYearEnd.slice(0, 2) : ""]].map(([k, x]) => `<div class="kpi"><div class="k">${k}</div><div style="font-weight:700">${esc(x || "—")}</div></div>`).join("")}</div>
+     <h3>Kiếm tiền bằng cách nào</h3><p>${esc(bm.summary || "—")}</p>
+     <h3>Cơ cấu doanh thu ${bm.period ? `<span class="tag">${esc(bm.period)}</span>` : ""}</h3>${barsHTML(bm.revenue_streams, x => x.name, x => x.share_pct, x => x.type, "var(--s1)")}
+     ${(bm.geography || []).length ? `<h3>Theo khu vực</h3>${barsHTML(bm.geography, x => x.region, x => x.share_pct, null, "var(--s3)")}` : ""}`);
+
+  const b2b = R.b2b || {};
+  h += section("s-b2b", "🔗 Mạng lưới B2B",
+    `<p>${esc(b2b.summary || "—")}</p><div id="netBox"></div>
+     <div class="legend"><span><i style="background:var(--s1)"></i>Khách hàng</span><span><i style="background:var(--s2)"></i>Nhà cung cấp</span><span><i style="background:var(--s3)"></i>Đối tác</span></div>
+     <div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Quan hệ</th><th>Tên</th><th>Mô tả</th><th>Mức quan trọng</th></tr></thead><tbody>
+     ${[["Khách hàng", b2b.customers], ["Nhà cung cấp", b2b.suppliers], ["Đối tác", b2b.partners]].flatMap(([k, a]) => (a || []).map(x => `<tr><td>${k}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.relation || "")}</td><td>${esc(x.importance || "")}</td></tr>`)).join("") || '<tr><td colspan="4" class="muted">Không có dữ liệu</td></tr>'}
+     </tbody></table></div>
+     <div class="two" style="margin-top:10px"><div class="box"><h3>Rủi ro phụ thuộc ít khách hàng</h3><p>${esc(b2b.concentration_risk || "—")}</p></div><div class="box"><h3>Chi phí để khách chuyển sang đối thủ</h3><p>${esc(b2b.switching_costs || "—")}</p></div></div>`);
+
+  const b2c = R.b2c || {};
+  h += section("s-b2c", "🛍️ Mảng B2C & thương hiệu",
+    b2c.applicable === false ? `<p><span class="pill">Không áp dụng</span> ${esc(b2c.summary || "Công ty không bán trực tiếp cho người tiêu dùng.")}</p>` :
+      `<p>${esc(b2c.summary || "—")}</p>
+     <div class="two"><div class="box"><h3>Sản phẩm chính</h3>${list((b2c.products || []).map(p => p.name + (p.note ? " — " + p.note : "")))}</div><div class="box"><h3>Kênh bán</h3>${list(b2c.channels)}</div></div>
+     <div class="grid g3" style="margin-top:10px">${[["Khách hàng", b2c.customer_base], ["Sức mạnh thương hiệu", b2c.brand_strength], ["Quyền tự đặt giá", b2c.pricing_power]].map(([k, x]) => `<div class="box"><h3>${k}</h3><p>${esc(x || "—")}</p></div>`).join("")}</div>`);
+
+  const fin = R.financials || {}, q = r.stats;
+  h += section("s-fin", "💰 Sức khoẻ tài chính",
+    `${secTable(r.sec)}
+     <h3>Chỉ số Claude tổng hợp ${fin.period ? `<span class="tag">${esc(fin.period)}</span>` : ""}</h3>
+     <div class="tablewrap"><table><thead><tr><th>Chỉ số</th><th class="r">Giá trị</th><th class="r">Xu hướng</th><th class="r">Nguồn</th></tr></thead><tbody>
+     ${(fin.metrics || []).map(m => { const t = String(m.trend || ""); const c = t.startsWith("tăng") ? "good" : t.startsWith("giảm") ? "bad" : ""; return `<tr><td>${esc(m.label)}</td><td class="r">${esc(m.value)}</td><td class="r">${t ? `<span class="pill ${c}">${c === "good" ? "▲" : c === "bad" ? "▼" : "■"} ${esc(t)}</span>` : ""}</td><td class="r muted" style="font-size:12.5px">${esc(m.source || "")}</td></tr>`; }).join("") || '<tr><td colspan="4" class="muted">—</td></tr>'}
+     </tbody></table></div>
+     ${q ? `<h3>Diễn biến giá</h3><div class="grid g4">${[["Lợi suất 1 tháng", fmtPct(q.r1m)], ["Lợi suất 3 tháng", fmtPct(q.r3m)], ["Lợi suất 1 năm", fmtPct(q.r1y)], ["Sụt giảm tối đa 1 năm", fmtPct(q.mdd1y)], ["Đỉnh / đáy 52 tuần", fmtPrice(q.hi) + " / " + fmtPrice(q.lo)], ["SMA50", fmtPrice(q.sma50)], ["SMA200", fmtPrice(q.sma200)], ["Xu hướng", q.sma200 && r.price > q.sma200 ? "Trên SMA200 ▲" : "Dưới SMA200 ▼"]].map(([k, x]) => `<div class="kpi"><div class="k">${k}</div><div class="num" style="font-weight:700">${esc(x)}</div></div>`).join("")}</div>` : ""}`,
+    "Bảng SEC lấy trực tiếp từ dữ liệu XBRL trong báo cáo 10-K/10-Q đã nộp. Lợi suất tính trên giá đã điều chỉnh cổ tức & chia tách.");
+
+  const val = R.valuation || {}; const fvL = num(val.fair_value_low), fvH = num(val.fair_value_high);
+  h += section("s-val", "⚖️ Định giá",
+    `<p>${esc(val.summary || "—")}</p>
+     <div class="tablewrap"><table><thead><tr><th>Chỉ số</th><th class="r">Công ty</th><th class="r">So sánh</th></tr></thead><tbody>${(val.metrics || []).map(m => `<tr><td>${esc(m.label)}</td><td class="r">${esc(m.company)}</td><td class="r">${esc(m.benchmark)}</td></tr>`).join("")}</tbody></table></div>
+     ${fvL && fvH ? `<h3>Giá trị hợp lý ước tính</h3>${fairBar(r.price, fvL, fvH)}<p class="sub num">${fmtPrice(fvL)} – ${fmtPrice(fvH)} · giá hiện tại ${r.price < fvL ? "<b style='color:var(--good)'>thấp hơn</b> vùng hợp lý" : r.price > fvH ? "<b style='color:var(--bad)'>cao hơn</b> vùng hợp lý" : "<b>nằm trong</b> vùng hợp lý"}</p>` : ""}`,
+    val.method ? `Phương pháp: ${esc(val.method)}` : "");
+
+  const g = R.growth || {};
+  h += section("s-grow", "🚀 Tiềm năng tăng trưởng",
+    `<p>${esc(g.summary || "—")}</p><h3>Động lực</h3>${list(g.drivers)}
+     <h3>Sự kiện có thể tác động giá</h3>
+     ${(g.catalysts || []).map(c => { const k = sevCls(c.impact); return `<div class="box" style="margin:8px 0"><div class="row" style="justify-content:space-between"><b>${esc(c.title)}</b><span class="pill ${k}">${esc(c.impact || "")}</span></div><div class="sub">${esc(c.date || "")}</div><p>${esc(c.detail || "")}</p></div>`; }).join("") || '<p class="muted">—</p>'}
+     <h3>Ngành</h3><p><b>Quy mô:</b> ${esc(R.industry?.tam || "—")} · <b>Tăng trưởng:</b> ${esc(R.industry?.growth || "—")}</p>${list(R.industry?.trends)}`);
+
+  const moat = R.moat || {};
+  h += section("s-moat", "🛡️ Lợi thế cạnh tranh & đối thủ",
+    `<p><span class="pill ${moat.rating === "rộng" ? "good" : moat.rating === "hẹp" ? "warn" : "bad"}">Lợi thế: ${esc(moat.rating || "—")}</span></p><p>${esc(moat.summary || "")}</p>${list(moat.sources)}
+     <h3>Đối thủ chính</h3><div class="tablewrap"><table><thead><tr><th>Đối thủ</th><th>So sánh</th></tr></thead><tbody>${(R.competitors || []).map(c => `<tr><td><b>${esc(c.name)}</b> ${c.ticker ? `<span class="tag">${esc(c.ticker)}</span>` : ""}</td><td>${esc(c.note || "")}</td></tr>`).join("")}</tbody></table></div>`);
+
+  const mg = R.management || {};
+  h += section("s-mgmt", "👔 Ban lãnh đạo & phân bổ vốn",
+    `<p><b>CEO:</b> ${esc(mg.ceo || "—")}</p><p>${esc(mg.summary || "")}</p><div class="two"><div class="box"><h3>Sở hữu nội bộ</h3><p>${esc(mg.insider_ownership || "—")}</p></div><div class="box"><h3>Phân bổ vốn</h3><p>${esc(mg.capital_allocation || "—")}</p></div></div>${R.esg ? `<h3>ESG</h3><p>${esc(R.esg)}</p>` : ""}`);
+
+  h += section("s-risk", "⚠️ Rủi ro",
+    (R.risks || []).map(x => { const c = sevCls(x.severity); return `<div class="box" style="margin:8px 0"><div class="row" style="justify-content:space-between"><b>${esc(x.title)}</b><span class="pill ${c}">${sevIcon(c)} ${esc(x.severity || "")}</span></div><p>${esc(x.detail || "")}</p></div>`; }).join("") || '<p class="muted">—</p>');
+
+  h += section("s-score", "🧮 Bảng chấm điểm",
+    CRIT.map(([k, label, w]) => { const s = num(R.scores?.[k]); return `<div class="bar-row"><div><b>${label}</b> <span class="muted">· ${w}%</span><div class="muted" style="font-size:12.5px">${esc(R.score_notes?.[k] || "")}</div></div><div class="bar-track"><div class="bar-fill" style="width:${s == null ? 0 : clamp(s, 0, 10) * 10}%;background:var(--s1)"></div></div><div class="num" style="font-weight:700">${s == null ? "N/A" : s + "/10"}</div></div>`; }).join(""),
+    "Tiêu chí N/A được loại khỏi trọng số. Kết luận theo quy tắc cố định: ≥70 điểm và kịch bản 1 tháng không âm → tích cực; 50–69 → trung lập; <50 → thận trọng.");
+
+  const filings = r.sec?.filings || [];
+  const srcs = (r.sources || []).filter(s => safeUrl(s.url));
+  h += section("s-src", "📚 Nguồn",
+    `<h3>Hồ sơ SEC gần nhất</h3>${filings.length ? `<ul class="list srcs">${filings.map(f => { const u = safeUrl(f.url); return `<li><b>${esc(f.form)}</b> nộp ${vi(f.filed)}${f.period ? ` · kỳ ${vi(f.period)}` : ""}${f.items ? ` · mục ${esc(f.items)}` : ""} — ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener">mở</a>` : ""}</li>`; }).join("")}</ul>` : '<p class="muted">Không lấy được dữ liệu SEC.</p>'}
+     <h3>Trang Claude đã đọc (${srcs.length})</h3><ul class="list srcs">${srcs.map(s => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.age ? ` <span class="muted">· ${esc(s.age)}</span>` : ""}${s.cited ? ' <span class="tag">được trích dẫn</span>' : ""}</li>`).join("")}</ul>
+     ${(R.data_gaps || []).length ? `<h3>Dữ liệu còn thiếu</h3>${list(R.data_gaps)}` : ""}
+     <p class="sub">Giá: ${esc(r.priceNote)}. Phân tích: ${esc(r.model || "Claude")}, ${esc(r.searches ?? 0)} lượt tìm kiếm web, lúc ${esc(new Date(r.createdAt).toLocaleString("vi-VN", { timeZone: "America/New_York" }))} giờ New York. Không phải lời khuyên đầu tư.</p>`);
+
+  const rep = $("#report"); rep.innerHTML = h; rep.classList.remove("hidden");
+  drawFan($("#fanBox"), r);
+  drawNetwork($("#netBox"), co.name || r.name || r.ticker, R.b2b || {});
+  $("#btnCopy").onclick = async () => {
+    const t = `${co.name || r.name} (${r.ticker}) — soi ngày ${vi(r.checkDate)}\nKết luận: ${v.t} · Điểm ${r.total ?? "—"}/100\nGiá: ${fmtPrice(r.price)} → dự kiến ${vi(r.targetDate)}: ${fmtPrice(fc.median)} (${fmtPct(chg)}), vùng 80%: ${fmtPrice(fc.b80[0])} – ${fmtPrice(fc.b80[1])}\n(Tham khảo, không phải lời khuyên đầu tư)`;
+    try { await navigator.clipboard.writeText(t); $("#btnCopy").textContent = "Đã sao chép ✓"; } catch { $("#btnCopy").textContent = "Không sao chép được"; }
+  };
+}
+
+// ---------- charts ----------
+function barsHTML(arr, nameF, valF, tagF, color) {
+  arr = (arr || []).filter(x => num(valF(x)) != null);
+  if (!arr.length) return '<p class="muted">Không có dữ liệu.</p>';
+  const max = Math.max(...arr.map(x => num(valF(x))), 1);
+  return arr.map(x => `<div class="bar-row"><div>${esc(nameF(x))}${tagF && tagF(x) ? `<span class="tag">${esc(tagF(x))}</span>` : ""}${x.note ? `<div class="muted" style="font-size:12.5px">${esc(x.note)}</div>` : ""}</div><div class="bar-track"><div class="bar-fill" style="width:${num(valF(x)) / max * 100}%;background:${color}"></div></div><div class="num" style="font-weight:700">${num(valF(x))}%</div></div>`).join("");
+}
+function ringSVG(total) {
+  const v = total == null ? 0 : total / 100, R = 30, C = 2 * Math.PI * R;
+  const col = total == null ? "var(--line)" : total >= 70 ? "var(--good)" : total >= 50 ? "var(--warn)" : "var(--bad)";
+  return `<svg width="76" height="76" viewBox="0 0 76 76" role="img" aria-label="Điểm ${total ?? "không rõ"} trên 100"><circle cx="38" cy="38" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="8"/><circle cx="38" cy="38" r="${R}" fill="none" stroke="${col}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${C * v} ${C}" transform="rotate(-90 38 38)"/><text x="38" y="44" text-anchor="middle" font-size="19" font-weight="800" fill="var(--text)" font-family="inherit">${total ?? "—"}</text></svg>`;
+}
+function fairBar(p, lo, hi) {
+  const a = Math.min(p, lo) * 0.9, b = Math.max(p, hi) * 1.1, X = v => (v - a) / (b - a) * 100;
+  return `<div style="position:relative;height:40px;margin:16px 0 6px"><div style="position:absolute;top:14px;left:0;right:0;height:10px;background:var(--surface-2);border-radius:4px"></div>
+  <div style="position:absolute;top:14px;height:10px;left:${X(lo)}%;width:${X(hi) - X(lo)}%;background:var(--good);opacity:.55;border-radius:4px"></div>
+  <div style="position:absolute;top:4px;left:calc(${X(p)}% - 1px);width:3px;height:30px;background:var(--text);border-radius:2px"></div>
+  <div class="num" style="position:absolute;top:-14px;left:${clamp(X(p), 8, 92)}%;transform:translateX(-50%);font-size:12px;font-weight:700;white-space:nowrap">Giá hiện tại</div></div>`;
+}
+function drawFan(box, r) {
+  const fc = r.forecast, W = 820, H = 330, m = { l: 64, r: 16, t: 16, b: 30 };
+  const hd = (r.history?.d || []).slice(-90), hc = (r.history?.c || []).slice(-90);
+  const start = parseISO(r.checkDate);
+  const pts = [];
+  hd.forEach((d, i) => { if (d < r.checkDate) pts.push({ d: parseISO(d), c: hc[i], kind: "h" }); });
+  pts.push({ d: start, kind: "f", k: 0, ...forecastPath(r.price, fc.mu, fc.sdDaily, r.T, 0), c: r.price });
+  futureTradingDates(start, r.T).forEach((d, i) => pts.push({ d, kind: "f", k: i + 1, ...forecastPath(r.price, fc.mu, fc.sdDaily, r.T, i + 1) }));
+  const N = pts.length;
+  let lo = Infinity, hi = -Infinity; for (const p of pts) for (const v of [p.c, p.l95, p.h95]) if (Number.isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  const py = (hi - lo) * 0.08; lo -= py; hi += py;
+  const X = i => m.l + i / (N - 1) * (W - m.l - m.r), Y = v => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
+  const f0 = pts.findIndex(p => p.kind === "f");
+  const area = (lk, hk) => { const fp = pts.slice(f0); return "M" + fp.map((p, j) => `${X(f0 + j).toFixed(1)},${Y(p[hk]).toFixed(1)}`).join("L") + "L" + fp.slice().reverse().map((p, j) => `${X(N - 1 - j).toFixed(1)},${Y(p[lk]).toFixed(1)}`).join("L") + "Z"; };
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Biểu đồ giá 90 phiên và vùng dự báo 1 tháng">`;
+  for (let i = 0; i <= 4; i++) { const v = lo + (hi - lo) * i / 4, y = Y(v); s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="12" fill="var(--text-2)" font-family="inherit">${fmtPrice(v)}</text>`; }
+  s += `<path d="${area("l95", "h95")}" fill="var(--band95)"/><path d="${area("l80", "h80")}" fill="var(--band80)"/><path d="${area("l50", "h50")}" fill="var(--band50)"/>`;
+  s += `<path d="M${pts.slice(f0).map((p, j) => `${X(f0 + j).toFixed(1)},${Y(p.m).toFixed(1)}`).join("L")}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  if (f0 > 0) s += `<path d="M${pts.slice(0, f0 + 1).map((p, i) => `${X(i).toFixed(1)},${Y(p.c).toFixed(1)}`).join("L")}" fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>`;
+  s += `<line x1="${X(f0)}" x2="${X(f0)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--text-3)" stroke-dasharray="2 3"/>`;
+  s += `<circle cx="${X(f0)}" cy="${Y(r.price)}" r="5" fill="var(--text)" stroke="var(--surface)" stroke-width="2"/><circle cx="${X(N - 1)}" cy="${Y(fc.median)}" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  s += `<text x="${X(N - 1) - 8}" y="${Y(fc.median) - 10}" text-anchor="end" font-size="12.5" font-weight="700" fill="var(--text)" font-family="inherit">${fmtPrice(fc.median)}</text>`;
+  const seen = new Set(); for (const i of [0, f0, N - 1]) { if (seen.has(i)) continue; seen.add(i); s += `<text x="${X(i)}" y="${H - 8}" text-anchor="${i === 0 ? "start" : i === N - 1 ? "end" : "middle"}" font-size="12" fill="var(--text-2)" font-family="inherit">${vi(pts[i].d)}</text>`; }
+  s += `<line class="cx" y1="${m.t}" y2="${H - m.b}" stroke="var(--text-2)" visibility="hidden"/></svg><div class="tip"></div>`;
+  box.innerHTML = s;
+  const svg = box.querySelector("svg"), tip = box.querySelector(".tip"), cx = box.querySelector(".cx");
+  const move = e => {
+    const rc = svg.getBoundingClientRect(); const x = (e.clientX - rc.left) / rc.width * W;
+    const i = clamp(Math.round((x - m.l) / (W - m.l - m.r) * (N - 1)), 0, N - 1); const p = pts[i];
+    cx.setAttribute("x1", X(i)); cx.setAttribute("x2", X(i)); cx.setAttribute("visibility", "visible");
+    tip.innerHTML = p.kind === "h" || p.k === 0 ? `<b>${vi(p.d)}</b><br>Giá: <b class="num">${fmtPrice(p.c)}</b>` : `<b>${vi(p.d)}</b> <span class="muted">(dự báo)</span><br>Trung vị: <b class="num">${fmtPrice(p.m)}</b><br><span class="num">80%: ${fmtPrice(p.l80)} – ${fmtPrice(p.h80)}</span>`;
+    tip.style.display = "block"; const px = X(i) / W * rc.width;
+    tip.style.left = Math.max(4, Math.min(px + 12, rc.width - tip.offsetWidth - 4)) + "px"; tip.style.top = "8px";
+  };
+  svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
+  svg.addEventListener("pointerleave", () => { tip.style.display = "none"; cx.setAttribute("visibility", "hidden"); });
+}
+function drawNetwork(box, center, b2b) {
+  const groups = [["customers", "var(--s1)", -Math.PI * 0.95, -Math.PI * 0.05], ["suppliers", "var(--s2)", Math.PI * 0.05, Math.PI * 0.45], ["partners", "var(--s3)", Math.PI * 0.55, Math.PI * 0.95]];
+  const W = 820, H = 400, cx = W / 2, cy = H / 2 + 6, R = 150, nodes = [];
+  for (const [k, col, a0, a1] of groups) { const arr = (b2b[k] || []).slice(0, 6); arr.forEach((x, i) => { const a = arr.length === 1 ? (a0 + a1) / 2 : a0 + (a1 - a0) * i / (arr.length - 1); nodes.push({ x: cx + Math.cos(a) * R * 1.5, y: cy + Math.sin(a) * R, col, name: String(x.name || ""), imp: String(x.importance || "") }); }); }
+  if (!nodes.length) { box.innerHTML = '<p class="muted">Chưa có dữ liệu quan hệ B2B.</p>'; return; }
+  const trunc = s => s.length > 18 ? s.slice(0, 17) + "…" : s;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sơ đồ quan hệ B2B: khách hàng, nhà cung cấp, đối tác">`;
+  for (const n of nodes) { const w = n.imp.startsWith("cao") ? 3 : n.imp.startsWith("trung") ? 2 : 1.2; s += `<line x1="${cx}" y1="${cy}" x2="${n.x}" y2="${n.y}" stroke="${n.col}" stroke-width="${w}" opacity=".7"/>`; }
+  s += `<circle cx="${cx}" cy="${cy}" r="46" fill="var(--text)"/><text x="${cx}" y="${cy + 5}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--surface)" font-family="inherit">${esc(String(center).slice(0, 14))}</text>`;
+  for (const n of nodes) { const left = n.x < cx; s += `<circle cx="${n.x}" cy="${n.y}" r="9" fill="${n.col}" stroke="var(--surface)" stroke-width="2"/><text x="${n.x + (left ? -14 : 14)}" y="${n.y + 5}" text-anchor="${left ? "end" : "start"}" font-size="17" font-weight="600" fill="var(--text)" font-family="inherit">${esc(trunc(n.name))}</text>`; }
+  box.innerHTML = s + "</svg>";
+}
+window.__render = renderReport; // used by tests
+</script>
+</body>
+</html>
