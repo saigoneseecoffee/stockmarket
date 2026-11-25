@@ -1,0 +1,20 @@
+name = "soicophieu"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# Trang GitHub Pages được phép gọi Worker (sửa thành link thật của bạn, cách nhau bởi dấu phẩy)
+ALLOWED_ORIGIN = "https://saigoneseecoffee.github.io"
+# Model Claude: claude-sonnet-5-5 (rẻ hơn) hoặc claude-opus-5-5 (sâu hơn, đắt hơn)
+MODEL = "claude-sonnet-5-5"
+MAX_SEARCHES = "8"
+DAILY_LIMIT = "30"
+# SEC yêu cầu User-Agent có tên + email liên hệ
+SEC_USER_AGENT = "Saigonesee StockCheck THAY_BANG_EMAIL_CUA_BAN@gmail.com"
+
+# Bật giới hạn lượt/ngày + khoá khi nhập sai PIN: chạy
+#   npx wrangler kv namespace create RL
+# rồi dán id vào đây và bỏ dấu # ở 3 dòng dưới.
+# [[kv_namespaces]]
+# binding = "RL"
+# id = "DAN_ID_VAO_DAY"
